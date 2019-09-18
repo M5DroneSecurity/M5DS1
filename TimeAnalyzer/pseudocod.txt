@@ -1,0 +1,6 @@
+For each pkt in first n pkts
+	Parse for matches
+	Add to count for that pkt
+Find the largest count
+Analyze timestamps between each i & i+1 occurance given spcified +/- tolerance
+if delta_t is consistant, mark packet as important & save its timstamp interval
