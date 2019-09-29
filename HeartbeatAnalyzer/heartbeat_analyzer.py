@@ -2,7 +2,7 @@
 Title: heartbeat_analyzer.py
 By: M5DS1
 Date: 09/23/19
-Description: Parses JSON for heartbeat packets. Returns timing frequency information. Outputs to spreadsheet.
+Description: Parses JSON for heartbeat packets. Returns timing frequency information and computes average time between heartbeats. Outputs to spreadsheet (wip).
 """
 
 import json
