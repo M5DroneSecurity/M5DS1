@@ -7,6 +7,7 @@ import numpy as np
 json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
 
 ''' Initialize Relevant Fields '''
+frame_reltime = []
 data_len = []
 data_data = []
 
@@ -17,6 +18,7 @@ with open(json_location) as src_file:
     for packet in src_loader:
         try:
             # Relevant Fields
+            frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
             data_len.append(packet['_source']['layers']['data']['data.len'])
             data_data.append(packet['_source']['layers']['data']['data.data'])
         except KeyError:
@@ -77,9 +79,9 @@ for n in range(len(data_data)):
 #                                                            compid, msgid, payload, checksum, signature))
 
 clean = pd.DataFrame(np.column_stack([magic, length, incompat_flags, compat_flags, seq, sysid, compid, msgid,
-                                      payload, checksum]),
+                                      payload, checksum, frame_reltime]),
                      columns=['magic [0]', 'length [1]', 'incompat_flags [2]', 'compat_flags [3]', 'seq [4]',
-                              'sysid [5]', 'compid [6]', 'msgid [7:10]', 'payload [10:-2]', 'checksum [-2:]'])
+                              'sysid [5]', 'compid [6]', 'msgid [7:10]', 'payload [10:-2]', 'checksum [-2:]', 'frame_reltime'])
 
 
 '''
