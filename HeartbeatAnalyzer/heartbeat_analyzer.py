@@ -10,7 +10,8 @@ import numpy as np
 import pandas as pd
 
 ''' Location of Data for Parsing '''
-json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
+json_location = 'decrypted/Viper/udp-7k-viper-trial5-json.json'
+# json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
 # json_location = 'decrypted/Viper/json-07272019-viper-trial3-01.json'
 
 
@@ -20,46 +21,125 @@ data_data = []
 count = 0
 with open(json_location) as src_file:
     src_loader = json.load(src_file)
-    print(src_loader)
+    # print(src_loader)
 
     for packet in src_loader:
         try:
             ''' Relevant Fields '''
             frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
             data_data.append(packet['_source']['layers']['data']['data.data'])
-            # print(count)
             count += 1
         except KeyError:
             print("Failed to append Data, KeyError")
 
 ''' Create a 2D Array that contains shows packets by split byte-fields '''
 split_data = []
-for dat in range(len(data_data)):
-    split_data.append(data_data[dat].split(':'))
-    # print(split_data[dat])
+payloads =[]
+payloads_id = []
 
-# print("Length of split_data is {}".format(split_data))
+for dat in range(len(data_data)):
+    split_data.append(data_data[dat].split(':')) # array of packets; packet is split into bytes
+    payloads.append(' '.join(split_data[dat][10:-2]))
+    payloads_id.append(split_data[dat][7:10])
+
 print("DEBUG: Length of data_data is {}".format(len(data_data)))
 
 '''
-Timing Data for Each packet
+Sample 300 consecutive payloads'''
+
+start = 6250
+end = start + 300
+sample = payloads[start:end]
+print("Sample size: 300 starting at ", start)
+
+
 '''
-hb_count = []
-hb_payload = []
-hb_reltime = []
+Get counts of all payloads in sample
+'''
 
-for n in range(len(data_data)):
-    # print(''.join(split_data[n][7:10]))
-    if ''.join(split_data[n][7:10]) == "000000":
-        hb_count.append(n)
-        hb_payload.append(' '.join(split_data[n][10:-2]))
-        hb_reltime.append(frame_reltime[n])
-        n += 1
+rep_count = []
+for item in sample:
+    rep_count.append(payloads.count(item))
+print("DEBUG: Sample counts", rep_count)
 
-print("DEBUG: hb_count:", hb_count)
-print("DEBUG: hb_payload:", hb_payload)
-print("DEBUG: hb_reltime:", hb_reltime)
 
+#most_repeated = sample[rep_count.index(max(rep_count))]
+#print("DEBUG: Most repeated payload", most_repeated)
+
+'''
+Save top 5 counts in the sample
+'''
+
+rep_set = set(rep_count)
+uniq_reps = list(rep_set)
+top1 = 0
+top2 = 0
+top3 = 0
+top4 = 0
+top5 = 0
+
+for j in range(len(uniq_reps)):
+    cnt = uniq_reps[j]
+    if cnt > top1:
+      top5 = top4
+      top4 = top3
+      top3 = top2
+      top2 = top1
+      top1 = cnt
+    elif cnt > top2:
+        top5 = top4
+        top4 = top3
+        top3 = top2
+        top2 = cnt
+    elif cnt > top3:
+        top5 = top4
+        top4 = top3
+        top3 = cnt
+    elif cnt > top4:
+        top5 = top4
+        top4 = cnt
+    elif cnt > top4:
+        top5 = cnt
+
+top_repeats = [] #for storing relevant information
+top_repeats.append([payloads_id[start + rep_count.index(top1)], payloads[start + rep_count.index(top1)]])
+top_repeats.append([payloads_id[start + rep_count.index(top2)], payloads[start + rep_count.index(top2)]])
+top_repeats.append([payloads_id[start + rep_count.index(top3)], payloads[start + rep_count.index(top3)]])
+top_repeats.append([payloads_id[start + rep_count.index(top4)], payloads[start + rep_count.index(top4)]])
+top_repeats.append([payloads_id[start + rep_count.index(top5)], payloads[start + rep_count.index(top5)]])
+
+'''
+Timing Data for Each Packet
+'''
+for j in range(0, 5):
+    hb_indexes = []
+    hb_reltimes = []
+    hb_deltas = []
+    avg_delta = 0
+
+    for n in range(start, end):
+        if payloads[n] == top_repeats[j][1]:
+            hb_indexes.append(n)
+            hb_reltimes.append(frame_reltime[n])
+
+    for i in range(len(hb_reltimes) - 1):
+        delta = float(hb_reltimes[i + 1]) - float(hb_reltimes[i])
+        hb_deltas.append(delta)
+        avg_delta = 0
+    if( len(hb_deltas) > 0):
+        sum = 0
+        for k in hb_deltas:
+            sum += k
+        avg_delta = sum / len(hb_deltas)
+    top_repeats[j].append(avg_delta)
+    print("Debug: Top Repeats", top_repeats[j])
+
+'''
+Print probable heartbeat in sample
+'''
+for m in range(0, 5):
+    if top_repeats[m][2] >.8 and top_repeats[m][2] <1.2:
+        print("Probable Heartbeat: ", top_repeats[m])
 
 # heartbeats = pd.DataFrame(np.column_stack([count, hb_payload, hb_reltime]), columns=['count', 'payload [10:-2]',
 #                                                                                      'relative_time'])
@@ -69,13 +149,3 @@ print("DEBUG: hb_reltime:", hb_reltime)
 #     heartbeats.to_excel(writer, sheet_name='heartbeat')
 
 
-
-'''
-Compute average relative time for heartbeat
-'''
-tsum = 0
-for i in range(len(hb_reltime)-1):
-    tsum += float(hb_reltime[i+1]) - float(hb_reltime[i])
-    print("count:", i, "value is:", hb_reltime[i])
-av_time = tsum / (len(hb_reltime) - 1)
-print("The average relative time is:", av_time)

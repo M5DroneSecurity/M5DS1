@@ -4,8 +4,8 @@ import numpy as np
 
 
 ''' Location of Data for Parsing '''
-json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
-
+json_location = 'decrypted/Viper/udp-7k-viper-trial5-json.json'
+# json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
 ''' Initialize Relevant Fields '''
 frame_reltime = []
 data_len = []
@@ -116,6 +116,7 @@ occurances = pd.DataFrame(np.column_stack([fieldcounter(magic), fieldcounter(len
                                    'compid [6]', 'msgid [7:10]']).T
 
 
-with pd.ExcelWriter('results/udp-100-viper-trial1.xlsx') as writer:
+# with pd.ExcelWriter('results/udp-100-viper-trial1.xlsx') as writer:
+with pd.ExcelWriter('results/udp-7k-viper-trial5-json.xlsx') as writer:
     clean.to_excel(writer, sheet_name='Parsed')
     occurances.to_excel(writer, sheet_name='Occurances')
