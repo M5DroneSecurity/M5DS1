@@ -101,7 +101,7 @@ for j in range(len(uniq_reps)):
     elif cnt > top4:
         top5 = cnt
 
-top_repeats = [] #for storing relevant information
+top_repeats = [] # for storing relevant information
 top_repeats.append([payloads_id[start + rep_count.index(top1)], payloads[start + rep_count.index(top1)]])
 top_repeats.append([payloads_id[start + rep_count.index(top2)], payloads[start + rep_count.index(top2)]])
 top_repeats.append([payloads_id[start + rep_count.index(top3)], payloads[start + rep_count.index(top3)]])
