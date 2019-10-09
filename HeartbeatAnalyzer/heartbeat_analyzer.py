@@ -142,9 +142,9 @@ for m in range(0, 5):
         print("Probable Heartbeat: ", top_repeats[m])
 
 
-heartbeats = pd.DataFrame(rep_count)
-
-
-with pd.ExcelWriter('results/hb-test-7k-pkts.xlsx') as writer:
-    heartbeats.to_excel(writer, sheet_name='heartbeat')
-
+# heartbeats = pd.DataFrame(rep_count)
+#
+#
+# with pd.ExcelWriter('results/hb-test-7k-pkts.xlsx') as writer:
+#     heartbeats.to_excel(writer, sheet_name='heartbeat')
+#
