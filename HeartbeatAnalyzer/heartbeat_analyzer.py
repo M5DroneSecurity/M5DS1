@@ -141,11 +141,10 @@ for m in range(0, 5):
     if top_repeats[m][2] >.8 and top_repeats[m][2] <1.2:
         print("Probable Heartbeat: ", top_repeats[m])
 
-# heartbeats = pd.DataFrame(np.column_stack([count, hb_payload, hb_reltime]), columns=['count', 'payload [10:-2]',
-#                                                                                      'relative_time'])
-#
-#
-# with pd.ExcelWriter('results/hb-test-100-pkts.xlsx') as writer:
-#     heartbeats.to_excel(writer, sheet_name='heartbeat')
 
+heartbeats = pd.DataFrame(rep_count)
+
+
+with pd.ExcelWriter('results/hb-test-7k-pkts.xlsx') as writer:
+    heartbeats.to_excel(writer, sheet_name='heartbeat')
 
