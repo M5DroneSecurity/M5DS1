@@ -4,9 +4,9 @@ import numpy as np
 
 
 ''' Location of Data for Parsing '''
-#json_location = 'decrypted/Viper/Viper_1.json'
-#json_location = 'decrypted/Viper/udp-7k-viper-trial5-json.json'
-# json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
+json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
+# json_location = 'decrypted/Intel_4_json.json'
+
 ''' Initialize Relevant Fields '''
 frame_reltime = []
 data_len = []
