@@ -1,14 +1,31 @@
-# EE496-Drone-Traffic-Profiling-Protocol-Reverse-Engineering
+# EE-x96-Drone-Traffic-Profiling-Protocol-Reverse-Engineering
+
+
+## Purpose
+This script parses through this JSON file to extract the payload data for each packet.
+  
+This payload data is then parsed using the MAVLINK 2.0 Serialization
+
+Outputs to Excel (.xlsx) Sheet in results/ directory
+
 
 ## Setup
+From Team Drive,
+  1) Download pcap from OFFICIAL DATA folder 
+
 Using Wireshark,
-1. decrypt packets with wpa-pwd
-2. export udp packets as json
+   1) Decrypt Packets 
+      1) Edit > Preferences > Protocols > IEEE 802.11 > Edit (Decryption Keys)
+      2) Create new entry
+      3) Add wpa-pwd type   
+      4) Under key field, insert password of drone (passwords found in cmdlist.txt in Data folder of team drive)
+   2) Filter UDP
+   3) Export as JSON
+      1) File > Export Packet Dissections > As JSON...
+
+Note: the variable json_location specifies the path to this JSON file
 
 
-## data_parser.py
-This script parses the packets .json file and delimits the Mavlink 2.0 message within the data frame. It then tabulates this data and exports it as a .xlsx file.
- 
 ## How to run
 With Anaconda Prompt,
 
@@ -25,5 +42,13 @@ With Anaconda Prompt,
     > python3 .\data_parser.py
 ``` 
 
+With Mac OS,
+
+       idk just do it
+
+
+
+
 
 Developed in JetBrains PyCharm 2019.1.2
+
