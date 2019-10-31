@@ -22,13 +22,17 @@ import numpy as np
 
 
 ''' Location of Data for Parsing '''
-json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
+# json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
+json_location = 'decrypted/Viper_1'
+# json_location = 'decrypted/Intel_4'
 # json_location = 'decrypted/Intel_4_json.json'
 
 ''' Initialize Relevant Fields '''
 frame_reltime = []
 data_len = []
 data_data = []
+count = 0
+dead = 0
 
 ''' Load JSON file '''
 with open(json_location) as src_file:
@@ -42,9 +46,12 @@ with open(json_location) as src_file:
             # frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
             data_len.append(packet['_source']['layers']['data']['data.len'])
             data_data.append(packet['_source']['layers']['data']['data.data'])
+            count += 1
         except KeyError:
-            print("Failed to append Data, KeyError")
-
+            print("Failed to append Data, KeyError. Packet " + str(count))
+            count += 1
+            dead += 1
+    print("Lost Packets ", dead)
     # for n in range(len(src_loader)):
     #     print("DEBUG src_loader:  {}\t{}".format(data_len[n], data_data[n]))
 
