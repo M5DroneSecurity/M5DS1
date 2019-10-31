@@ -14,9 +14,14 @@ From Team Drive,
   1) Download pcap from OFFICIAL DATA folder 
 
 Using Wireshark,
-   1) decrypt pcap with wpa-pwd
-   2) filter UDP
-   3) File > Export Packet Dissections > As JSON...
+   1) Decrypt Packets 
+      1) Edit > Preferences > Protocols > IEEE 802.11 > Edit (Decryption Keys)
+      2) Create new entry
+      3) Add wpa-pwd type   
+      4) Under key field, insert password of drone (passwords found in cmdlist.txt in Data folder of team drive)
+   2) Filter UDP
+   3) Export as JSON
+      1) File > Export Packet Dissections > As JSON...
 
 Note: the variable json_location specifies the path to this JSON file
 
@@ -41,8 +46,9 @@ With Mac OS,
 
        idk just do it
 
+
+
+
+
 Developed in JetBrains PyCharm 2019.1.2
-
-
-## Useful Links
 
