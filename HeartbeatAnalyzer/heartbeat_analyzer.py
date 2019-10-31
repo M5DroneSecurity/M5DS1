@@ -6,14 +6,18 @@ Description: Parses JSON for heartbeat packets. Returns timing frequency informa
 """
 
 import json
+import random
+import statistics
+import xlsxwriter
 import numpy as np
 import pandas as pd
 
 ''' Location of Data for Parsing '''
-json_location = 'decrypted/Viper/udp-7k-viper-trial5-json.json'
+# json_location = 'decrypted/Viper/udp-7k-viper-trial5-json.json'
 # json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
 # json_location = 'decrypted/Viper/json-07272019-viper-trial3-01.json'
-
+json_location = 'decrypted/Viper/Viper_1.json'
+#json_location = 'decrypted/Viper/Intel_1.json'
 
 ''' Initialize Relevant Fields '''
 frame_reltime = []
@@ -25,10 +29,12 @@ with open(json_location) as src_file:
 
     for packet in src_loader:
         try:
-            ''' Relevant Fields '''
-            frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
-            data_data.append(packet['_source']['layers']['data']['data.data'])
-            count += 1
+            packet_array = packet['_source']['layers']['data']['data.data'].split(':')
+            if packet_array[0] == 'fd':
+                ''' Relevant Fields '''
+                frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
+                data_data.append(packet['_source']['layers']['data']['data.data'])
+                count += 1
         except KeyError:
             print("Failed to append Data, KeyError")
 
@@ -40,14 +46,14 @@ payloads_id = []
 for dat in range(len(data_data)):
     split_data.append(data_data[dat].split(':')) # array of packets; packet is split into bytes
     payloads.append(' '.join(split_data[dat][10:-2]))
-    payloads_id.append(split_data[dat][7:10])
+    payloads_id.append(' '.join(split_data[dat][7:10]))
 
 print("DEBUG: Length of data_data is {}".format(len(data_data)))
 
 '''
-Sample 300 consecutive payloads'''
+Pick random sample of 300 consecutive payloads'''
 
-start = 6250
+start = random.randint(0, len(data_data) - 300)
 end = start + 300
 sample = payloads[start:end]
 print("Sample size: 300 starting at ", start)
@@ -57,10 +63,10 @@ print("Sample size: 300 starting at ", start)
 Get counts of all payloads in sample
 '''
 
-rep_count = []
+payload_rep_count = []
 for item in sample:
-    rep_count.append(payloads.count(item))
-print("DEBUG: Sample counts", rep_count)
+    payload_rep_count.append(payloads.count(item))
+print("DEBUG: Sample counts", payload_rep_count)
 
 
 #most_repeated = sample[rep_count.index(max(rep_count))]
@@ -70,7 +76,7 @@ print("DEBUG: Sample counts", rep_count)
 Save top 5 counts in the sample
 '''
 
-rep_set = set(rep_count)
+rep_set = set(payload_rep_count)
 uniq_reps = list(rep_set)
 top1 = 0
 top2 = 0
@@ -102,11 +108,11 @@ for j in range(len(uniq_reps)):
         top5 = cnt
 
 top_repeats = [] # for storing relevant information
-top_repeats.append([payloads_id[start + rep_count.index(top1)], payloads[start + rep_count.index(top1)]])
-top_repeats.append([payloads_id[start + rep_count.index(top2)], payloads[start + rep_count.index(top2)]])
-top_repeats.append([payloads_id[start + rep_count.index(top3)], payloads[start + rep_count.index(top3)]])
-top_repeats.append([payloads_id[start + rep_count.index(top4)], payloads[start + rep_count.index(top4)]])
-top_repeats.append([payloads_id[start + rep_count.index(top5)], payloads[start + rep_count.index(top5)]])
+top_repeats.append([payloads_id[start + payload_rep_count.index(top1)], payloads[start + payload_rep_count.index(top1)]])
+top_repeats.append([payloads_id[start + payload_rep_count.index(top2)], payloads[start + payload_rep_count.index(top2)]])
+top_repeats.append([payloads_id[start + payload_rep_count.index(top3)], payloads[start + payload_rep_count.index(top3)]])
+top_repeats.append([payloads_id[start + payload_rep_count.index(top4)], payloads[start + payload_rep_count.index(top4)]])
+top_repeats.append([payloads_id[start + payload_rep_count.index(top5)], payloads[start + payload_rep_count.index(top5)]])
 
 '''
 Timing Data for Each Packet
@@ -142,9 +148,49 @@ for m in range(0, 5):
         print("Probable Heartbeat: ", top_repeats[m])
 
 
-# heartbeats = pd.DataFrame(rep_count)
+'''
+Timing for each message ID
+'''
+idTiming = []
+
+for refIndex in range(start, end):
+    if not idTiming.__contains__(payloads_id[refIndex]):
+        idIndexes = []
+        idReltimes = []
+        idDeltas = []
+        avgIDdelta = 0
+        avgIDstdDev = 0
+        for n in range(refIndex, end):
+            if payloads_id[n] == payloads_id[refIndex]:
+                idIndexes.append(n)
+                idReltimes.append(frame_reltime[n])
+
+        for i in range(len(idReltimes) - 1):
+            delta = float(idReltimes[i + 1]) - float(idReltimes[i])
+            idDeltas.append(delta)
+
+        if len(idDeltas) > 1:
+            avgIDdelta = statistics.mean(idDeltas)
+            avgIDstdDev = statistics.stdev(idDeltas)
+    stats = [avgIDdelta, avgIDstdDev]
+    stats.append(payloads_id[refIndex])
+    stats.extend(idIndexes)
+    idTiming.append(stats)
+
+print("Debug ID Timing: ", idTiming)
+
+# heartbeats = pd.DataFrame(idTiming)
 #
 #
-# with pd.ExcelWriter('results/hb-test-7k-pkts.xlsx') as writer:
+# with pd.ExcelWriter('results/Viper1-stats.xlsx') as writer:
 #     heartbeats.to_excel(writer, sheet_name='heartbeat')
 #
+# workbook = xlsxwriter.Workbook('results/Viper1-array.xlsx')
+# worksheet = workbook.add_worksheet()
+# 
+# row = 0
+# 
+# for col, data in enumerate(idTiming):
+#     worksheet.write_column(row, col, data)
+# 
+# workbook.close()
