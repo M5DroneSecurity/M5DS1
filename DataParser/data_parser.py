@@ -24,17 +24,19 @@ import numpy as np
 ''' Location of Data for Parsing '''
 # json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
 json_location = 'decrypted/Viper_1'
-# json_location = 'decrypted/Intel_4'
+# json_location = 'decrypted/solo_test.json'
 # json_location = 'decrypted/Intel_4_json.json'
 
 ''' Initialize Relevant Fields '''
 frame_reltime = []
+payload_len = []
 data_len = []
 data_data = []
 count = 0
 dead = 0
 
 ''' Load JSON file '''
+print("Grabbing JSON: ", json_location)
 with open(json_location) as src_file:
     src_loader = json.load(src_file)
     # print(src_loader)
@@ -42,11 +44,14 @@ with open(json_location) as src_file:
     ''' Parse through JSON file for specific information'''
     for packet in src_loader:
         try:
-            ''' Relevant fields '''
-            # frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
-            data_len.append(packet['_source']['layers']['data']['data.len'])
-            data_data.append(packet['_source']['layers']['data']['data.data'])
-            count += 1
+            packet_array = packet['_source']['layers']['data']['data.data'].split(':')
+            if packet_array[0] == 'fd':
+                ''' Relevant fields '''
+                frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
+                payload_len.append(int(packet['_source']['layers']['data']['data.len']) - 12)
+                data_len.append(packet['_source']['layers']['data']['data.len'])
+                data_data.append(packet['_source']['layers']['data']['data.data'])
+                count += 1
         except KeyError:
             print("Failed to append Data, KeyError. Packet " + str(count))
             count += 1
@@ -82,7 +87,6 @@ compid = []
 msgid = []
 payload = []
 checksum = []
-signature = []
 
 ''' Store data in these field arrays '''
 for n in range(len(data_data)):
@@ -97,11 +101,11 @@ for n in range(len(data_data)):
     payload.append(' '.join(split_data[n][10:-2]))
     checksum.append(' '.join(split_data[n][-2:]))
 
-
 clean = pd.DataFrame(np.column_stack([magic, length, incompat_flags, compat_flags, seq, sysid, compid, msgid, payload,
-                                      checksum]),
+                                      checksum,frame_reltime, payload_len]),
                      columns=['magic [0]', 'length [1]', 'incompat_flags [2]', 'compat_flags [3]', 'seq [4]',
-                              'sysid [5]', 'compid [6]', 'msgid [7:10]', 'payload [10:-2]', 'checksum [-2:]'])
+                              'sysid [5]', 'compid [6]', 'msgid [7:10]', 'payload [10:-2]', 'checksum [-2:]',
+                              'FRAME_RELTIME', 'PAYLOAD_LENGTH'])
 
 
 '''
@@ -120,14 +124,16 @@ def fieldcounter(data_field):
 
     return count_arr
 
-# print(fieldcounter(length))
+# print(list(fieldcounter(msgid).keys()))
 
 occurances = pd.DataFrame(np.column_stack([fieldcounter(magic), fieldcounter(length), fieldcounter(incompat_flags),
                                            fieldcounter(compat_flags), fieldcounter(sysid),
                                            fieldcounter(compid), fieldcounter(msgid)]),
                           columns=['magic [0]', 'length [1]', 'incompat_flags [2]', 'compat_flags [3]', 'sysid [5]',
-                                   'compid [6]', 'msgid [7:10]']).T
+                                   'compid [6]', 'msgid [7:10]'])
 
+msg_ids = pd.DataFrame(np.column_stack([list(fieldcounter(msgid).keys()), list(fieldcounter(msgid).values())]),
+                          columns=['Msg_ID', 'Occurrences'])
 
 
 '''
@@ -136,6 +142,8 @@ Let's display parsed data and occurance count in an excel file (.xlsx)
 NOTE: I can't autofit columns through the script but here's how to do it manually:
 https://support.office.com/en-us/article/change-the-column-width-and-row-height-72f5e3cc-994d-43e8-ae58-9774a0905f46
 '''
-with pd.ExcelWriter('results/intel_results_test.xlsx') as writer:
+with pd.ExcelWriter('results/Viper_1.xlsx') as writer:
     clean.to_excel(writer, sheet_name='Parsed')
     occurances.to_excel(writer, sheet_name='Occurances')
+    msg_ids.to_excel(writer, sheet_name='Msg_IDs')
+
