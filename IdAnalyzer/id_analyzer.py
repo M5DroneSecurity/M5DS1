@@ -1,23 +1,23 @@
 """
-Title: id_analyzer.py
+Title: heartbeat_analyzer.py
 By: M5DS1
-Date: 10/24/19
+Date: 09/23/19
 Description: Parses JSON for heartbeat packets. Returns timing frequency information and computes average time between heartbeats. Outputs to spreadsheet (wip).
 """
 
 import json
 import random
+import matplotlib.pyplot as plt
 import statistics
 import xlsxwriter
 import numpy as np
 import pandas as pd
 
 ''' Location of Data for Parsing '''
-# json_location = 'decrypted/Viper/udp-7k-viper-trial5-json.json'
-# json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
-# json_location = 'decrypted/Viper/json-07272019-viper-trial3-01.json'
-json_location = 'decrypted/Viper/Viper_1.json'
 
+# json_location = '../Data/decrypted/Viper/Viper_1.json'
+json_location = '../Data/decrypted/Intel/Intel_3.json'
+#json_location = '../Data/decrypted/Intel/Intel_1_1of16.json'
 
 ''' Initialize Relevant Fields '''
 frame_reltime = []
@@ -40,9 +40,8 @@ with open(json_location) as src_file:
 
 ''' Create a 2D Array that contains shows packets by split byte-fields '''
 split_data = []
-payloads =[]
+payloads = []
 payloads_id = []
-vipIDs = ['7d 00 00', '00 00 00', '93 00 00', '98 00 00', 'a5 00 00', 'a2 00 00', '2a 00 00']
 
 for dat in range(len(data_data)):
     split_data.append(data_data[dat].split(':')) # array of packets; packet is split into bytes
@@ -52,49 +51,22 @@ for dat in range(len(data_data)):
 print("DEBUG: Length of data_data is {}".format(len(data_data)))
 
 '''
-Timing for each message ID
+Get counts of all IDs in data
 '''
-idTiming = []
 
-for target in vipIDs:
-    idIndexes = []
-    idReltimes = []
-    idDeltas = []
-    avgIDdelta = 0
-    avgIDstdDev = 0
+id_rep_count = []
+unique_id = list(dict.fromkeys(payloads_id) )
+for item in unique_id:
+    id_rep_count.append(payloads_id.count(item))
+    print(f"id: {item} count: {payloads_id.count(item)}")
 
-    for x in range(len(data_data)):
-
-        if payloads_id[x] == target:
-            idIndexes.append(x)
-            idReltimes.append(frame_reltime[x])
-
-    for i in range(len(idReltimes) - 1):
-        delta = float(idReltimes[i + 1]) - float(idReltimes[i])
-        idDeltas.append(delta)
-
-    if len(idDeltas) > 1:
-        avgIDdelta = statistics.mean(idDeltas)
-        avgIDstdDev = statistics.stdev(idDeltas)
-    stats = [avgIDdelta, avgIDstdDev]
-    stats.append(target)
-    stats.extend(idReltimes)
-    idTiming.append(stats)
-for element in idTiming:
-        print("Debug ID Timing: ", element)
-
-# heartbeats = pd.DataFrame(idTiming)
-#
-#
-# with pd.ExcelWriter('results/Viper1-stats.xlsx') as writer:
-#     heartbeats.to_excel(writer, sheet_name='heartbeat')
-#
-workbook = xlsxwriter.Workbook('results/Viper1-array.xlsx')
-worksheet = workbook.add_worksheet()
-
-row = 0
-
-for col, data in enumerate(idTiming):
-    worksheet.write_column(row, col, data)
-
-workbook.close()
+fig = plt.figure()
+plt.bar(unique_id, id_rep_count)
+plt.xlabel('MsgID')
+plt.ylabel('ID count')
+plt.xticks(rotation=90)
+plt.yticks(np.arange(100, max(id_rep_count), 200))
+ax = plt.gca()
+ax.grid(True)
+plt.show()
+fig.savefig('results/plot.png')

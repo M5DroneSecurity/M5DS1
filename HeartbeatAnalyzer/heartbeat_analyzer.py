@@ -7,17 +7,17 @@ Description: Parses JSON for heartbeat packets. Returns timing frequency informa
 
 import json
 import random
+import matplotlib.pyplot as plt
 import statistics
 import xlsxwriter
 import numpy as np
 import pandas as pd
 
 ''' Location of Data for Parsing '''
-# json_location = 'decrypted/Viper/udp-7k-viper-trial5-json.json'
-# json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
-# json_location = 'decrypted/Viper/json-07272019-viper-trial3-01.json'
-json_location = 'decrypted/Viper/Viper_1.json'
-#json_location = 'decrypted/Viper/Intel_1.json'
+
+json_location = '../Data/decrypted/Viper/Viper_1.json'
+#json_location = '../Data/decrypted/Intel/Intel_3.json'
+
 
 ''' Initialize Relevant Fields '''
 frame_reltime = []
@@ -40,7 +40,7 @@ with open(json_location) as src_file:
 
 ''' Create a 2D Array that contains shows packets by split byte-fields '''
 split_data = []
-payloads =[]
+payloads = []
 payloads_id = []
 
 for dat in range(len(data_data)):
@@ -50,10 +50,14 @@ for dat in range(len(data_data)):
 
 print("DEBUG: Length of data_data is {}".format(len(data_data)))
 
+
+
 '''
-Pick random sample of 300 consecutive payloads'''
+Pick random sample of 300 consecutive payloads
+'''
 
 start = random.randint(0, len(data_data) - 300)
+#start = 30964
 end = start + 300
 sample = payloads[start:end]
 print("Sample size: 300 starting at ", start)
@@ -67,7 +71,6 @@ payload_rep_count = []
 for item in sample:
     payload_rep_count.append(payloads.count(item))
 print("DEBUG: Sample counts", payload_rep_count)
-
 
 #most_repeated = sample[rep_count.index(max(rep_count))]
 #print("DEBUG: Most repeated payload", most_repeated)
@@ -146,51 +149,3 @@ Print probable heartbeat in sample
 for m in range(0, 5):
     if top_repeats[m][2] >.8 and top_repeats[m][2] <1.2:
         print("Probable Heartbeat: ", top_repeats[m])
-
-
-'''
-Timing for each message ID
-'''
-idTiming = []
-
-for refIndex in range(start, end):
-    if not idTiming.__contains__(payloads_id[refIndex]):
-        idIndexes = []
-        idReltimes = []
-        idDeltas = []
-        avgIDdelta = 0
-        avgIDstdDev = 0
-        for n in range(refIndex, end):
-            if payloads_id[n] == payloads_id[refIndex]:
-                idIndexes.append(n)
-                idReltimes.append(frame_reltime[n])
-
-        for i in range(len(idReltimes) - 1):
-            delta = float(idReltimes[i + 1]) - float(idReltimes[i])
-            idDeltas.append(delta)
-
-        if len(idDeltas) > 1:
-            avgIDdelta = statistics.mean(idDeltas)
-            avgIDstdDev = statistics.stdev(idDeltas)
-    stats = [avgIDdelta, avgIDstdDev]
-    stats.append(payloads_id[refIndex])
-    stats.extend(idIndexes)
-    idTiming.append(stats)
-
-print("Debug ID Timing: ", idTiming)
-
-# heartbeats = pd.DataFrame(idTiming)
-#
-#
-# with pd.ExcelWriter('results/Viper1-stats.xlsx') as writer:
-#     heartbeats.to_excel(writer, sheet_name='heartbeat')
-#
-# workbook = xlsxwriter.Workbook('results/Viper1-array.xlsx')
-# worksheet = workbook.add_worksheet()
-# 
-# row = 0
-# 
-# for col, data in enumerate(idTiming):
-#     worksheet.write_column(row, col, data)
-# 
-# workbook.close()

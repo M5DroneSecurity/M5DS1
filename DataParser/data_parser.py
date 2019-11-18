@@ -22,9 +22,9 @@ import numpy as np
 
 
 ''' Location of Data for Parsing '''
-json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
-# json_location = 'decrypted/Intel_4_json.json'
-
+# json_location = 'decrypted/Viper/Viper_1.json'
+#json_location = '../Data/decrypted/Intel/Intel_3.json'
+json_location = '../Data/decrypted/Intel/Intel_1_4of16.json'
 ''' Initialize Relevant Fields '''
 frame_reltime = []
 data_len = []
@@ -39,9 +39,9 @@ with open(json_location) as src_file:
     for packet in src_loader:
         try:
             ''' Relevant fields '''
-            # frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
             data_len.append(packet['_source']['layers']['data']['data.len'])
             data_data.append(packet['_source']['layers']['data']['data.data'])
+            frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
         except KeyError:
             print("Failed to append Data, KeyError")
 
@@ -56,6 +56,7 @@ for dat in range(len(data_data)):
 
 # print("DEBUG: Length of split_data is {}".format(split_data))
 print("DEBUG: Length of data_data is {}".format(len(data_data)))
+print("DEBUG: Length of frame_reltime is {}".format(len(frame_reltime)))
 
 
 '''
@@ -91,9 +92,9 @@ for n in range(len(data_data)):
     checksum.append(' '.join(split_data[n][-2:]))
 
 
-clean = pd.DataFrame(np.column_stack([magic, length, incompat_flags, compat_flags, seq, sysid, compid, msgid, payload,
+clean = pd.DataFrame(np.column_stack([frame_reltime, magic, length, incompat_flags, compat_flags, seq, sysid, compid, msgid, payload,
                                       checksum]),
-                     columns=['magic [0]', 'length [1]', 'incompat_flags [2]', 'compat_flags [3]', 'seq [4]',
+                     columns=['frame_reltime', 'magic [0]', 'length [1]', 'incompat_flags [2]', 'compat_flags [3]', 'seq [4]',
                               'sysid [5]', 'compid [6]', 'msgid [7:10]', 'payload [10:-2]', 'checksum [-2:]'])
 
 
@@ -129,6 +130,6 @@ Let's display parsed data and occurance count in an excel file (.xlsx)
 NOTE: I can't autofit columns through the script but here's how to do it manually:
 https://support.office.com/en-us/article/change-the-column-width-and-row-height-72f5e3cc-994d-43e8-ae58-9774a0905f46
 '''
-with pd.ExcelWriter('results/intel_results_test.xlsx') as writer:
+with pd.ExcelWriter('results/results_test.xlsx') as writer:
     clean.to_excel(writer, sheet_name='Parsed')
     occurances.to_excel(writer, sheet_name='Occurances')
