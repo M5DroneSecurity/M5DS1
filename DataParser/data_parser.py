@@ -22,12 +22,13 @@ import numpy as np
 from xml.dom import minidom
 
 ''' Only Change This!! '''
-json_filename = 'Viper_1'
+json_directory = 'decrypted/'
+json_filename = 'intel_6'
 ''' Only Change This!! '''
 
 
 ''' Location of Data for Parsing '''
-json_location = 'decrypted/'+json_filename+'.json'
+json_location = json_directory+json_filename+'.json'
 
 ''' Initialize Relevant Fields '''
 ip_src = []
@@ -165,16 +166,17 @@ def occur_grapher(writer_, sheet_, data_):
 
     ## Configure the series of the chart from the dataframe data
     indexList = list(data_['Occurrences'])
-    r1 = 2
-    r2 = len(indexList) + 1
+    r1 = 1
+    r2 = len(indexList)
     occur_chart.add_series({
         'categories': [sheet_, r1, 1, r2, 1],
-        'values': [sheet_, r1, 2, r2, 2]
+        'values': [sheet_, r1, 2, r2, 2],
+        'data_labels': {'value': True}
     })
 
     ## Configure chart axis
     occur_chart.set_x_axis({'name': 'Number of Packets'})
-    occur_chart.set_y_axis({'name': 'Message ID'})
+    occur_chart.set_y_axis({'name': 'Message ID', 'reverse':True})
 
     ## Title and Size
     occur_chart.set_title({'name': 'Occurrences by Msg_ID'})
@@ -202,8 +204,8 @@ def payload_grapher(writer_, sheet_, data_, msgid_):
 
     ## Configure the series of the chart from the dataframe data
     indexList = list(data_['PAYLOAD_LENGTH'])
-    r1 = 2
-    r2 = len(indexList) + 1
+    r1 = 1
+    r2 = len(indexList)
     plen_chart.add_series({
         'categories': [sheet_, r1, 1, r2, 1],
         'values': [sheet_, r1, 11, r2, 11]
@@ -247,8 +249,8 @@ def time_grapher(writer_, sheet_, data_, msgid_):
 
     ## Configure the series of the chart from the dataframe data
     indexList = list(data_['FRAME_RELTIME'])
-    r1 = 2
-    r2 = len(indexList) + 1
+    r1 = 1
+    r2 = len(indexList)
     time_chart.add_series({
         'categories': [sheet_, r1, 1, r2, 1],
         'values': [sheet_, r1, 15, r2, 15]
@@ -340,9 +342,8 @@ https://support.office.com/en-us/article/change-the-column-width-and-row-height-
 '''
 with pd.ExcelWriter('results/'+json_filename+'.xlsx', engine='xlsxwriter') as writer:
     clean.to_excel(writer, sheet_name='All Packets')
-    occurrences.to_excel(writer, sheet_name='Occurrences')
-    msg_ids.to_excel(writer, sheet_name='Msg_IDs')
-    occur_grapher(writer, 'Msg_IDs', msg_ids)
+    msg_ids.to_excel(writer, sheet_name='Occurrences')
+    occur_grapher(writer, 'Occurrences', msg_ids)
     hb = clean.loc[clean['msgid [7:10]'] == '00 00 00']
     hb['TIME_DELTA'] = hb['FRAME_RELTIME'] - hb['FRAME_RELTIME'].shift(1)
     hb.to_excel(writer, sheet_name='msgID-'+'00 00 00')
