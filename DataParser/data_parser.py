@@ -19,7 +19,6 @@ Description:
 import json
 import pandas as pd
 import numpy as np
-<<<<<<< HEAD
 from xml.dom import minidom
 
 ''' Only Change This!! '''
@@ -35,28 +34,13 @@ ip_src = []
 ip_dst = []
 frame_reltime = []
 payload_len = []
-=======
-
-
-''' Location of Data for Parsing '''
-# json_location = 'decrypted/Viper/100p-udp-viper-trial1.json'
-json_location = 'decrypted/Viper_1'
-# json_location = 'decrypted/Intel_4'
-# json_location = 'decrypted/Intel_4_json.json'
-
-''' Initialize Relevant Fields '''
-frame_reltime = []
->>>>>>> 23598fd066b78c745309480d9d18aaf5ea7d3244
 data_len = []
 data_data = []
 count = 0
 dead = 0
 
 ''' Load JSON file '''
-<<<<<<< HEAD
 print("Grabbing JSON: ", json_location)
-=======
->>>>>>> 23598fd066b78c745309480d9d18aaf5ea7d3244
 with open(json_location) as src_file:
     src_loader = json.load(src_file)
     # print(src_loader)
@@ -64,7 +48,6 @@ with open(json_location) as src_file:
     ''' Parse through JSON file for specific information'''
     for packet in src_loader:
         try:
-<<<<<<< HEAD
             packet_array = packet['_source']['layers']['data']['data.data'].split(':')
             ''' Filter for MavLink 2.0 '''
             if packet_array[0] == 'fd':
@@ -76,13 +59,6 @@ with open(json_location) as src_file:
                 data_len.append(packet['_source']['layers']['data']['data.len'])
                 data_data.append(packet['_source']['layers']['data']['data.data'])
                 count += 1
-=======
-            ''' Relevant fields '''
-            # frame_reltime.append(packet['_source']['layers']['frame']['frame.time_relative'])
-            data_len.append(packet['_source']['layers']['data']['data.len'])
-            data_data.append(packet['_source']['layers']['data']['data.data'])
-            count += 1
->>>>>>> 23598fd066b78c745309480d9d18aaf5ea7d3244
         except KeyError:
             print("Failed to append Data, KeyError. Packet " + str(count))
             count += 1
@@ -118,10 +94,6 @@ compid = []
 msgid = []
 payload = []
 checksum = []
-<<<<<<< HEAD
-=======
-signature = []
->>>>>>> 23598fd066b78c745309480d9d18aaf5ea7d3244
 
 ''' Store data in these field arrays '''
 for n in range(len(data_data)):
@@ -136,7 +108,6 @@ for n in range(len(data_data)):
     payload.append(' '.join(split_data[n][10:-2]))
     checksum.append(' '.join(split_data[n][-2:]))
 
-<<<<<<< HEAD
 clean = pd.DataFrame(np.column_stack([magic, length, incompat_flags, compat_flags, seq, sysid, compid, msgid, payload,
                                       checksum, payload_len, ip_src, ip_dst, frame_reltime]),
                      columns=['magic [0]', 'length [1]', 'incompat_flags [2]', 'compat_flags [3]', 'seq [4]',
@@ -146,14 +117,6 @@ clean = pd.DataFrame(np.column_stack([magic, length, incompat_flags, compat_flag
 ''' Convert some fields to numeric '''
 clean['FRAME_RELTIME'] = pd.to_numeric(clean['FRAME_RELTIME'])
 clean['PAYLOAD_LENGTH'] = pd.to_numeric(clean['PAYLOAD_LENGTH'])
-=======
-
-clean = pd.DataFrame(np.column_stack([magic, length, incompat_flags, compat_flags, seq, sysid, compid, msgid, payload,
-                                      checksum]),
-                     columns=['magic [0]', 'length [1]', 'incompat_flags [2]', 'compat_flags [3]', 'seq [4]',
-                              'sysid [5]', 'compid [6]', 'msgid [7:10]', 'payload [10:-2]', 'checksum [-2:]'])
-
->>>>>>> 23598fd066b78c745309480d9d18aaf5ea7d3244
 
 '''
 Next, I want it to display random statistical information.
@@ -171,7 +134,6 @@ def fieldcounter(data_field):
 
     return count_arr
 
-<<<<<<< HEAD
 # print(list(fieldcounter(msgid).keys()))
 
 
@@ -368,16 +330,6 @@ def stat_tabler(writer_, sheet_, data_, msg_):
 
     worksheet.write('S6', 'Ave Payload Length:', cell_format)
     worksheet.write_formula('T6', '=AVERAGE(L{0}:L{1})'.format(r1, r2), cell_format2)
-=======
-# print(fieldcounter(length))
-
-occurances = pd.DataFrame(np.column_stack([fieldcounter(magic), fieldcounter(length), fieldcounter(incompat_flags),
-                                           fieldcounter(compat_flags), fieldcounter(sysid),
-                                           fieldcounter(compid), fieldcounter(msgid)]),
-                          columns=['magic [0]', 'length [1]', 'incompat_flags [2]', 'compat_flags [3]', 'sysid [5]',
-                                   'compid [6]', 'msgid [7:10]']).T
-
->>>>>>> 23598fd066b78c745309480d9d18aaf5ea7d3244
 
 
 '''
@@ -386,7 +338,6 @@ Let's display parsed data and occurance count in an excel file (.xlsx)
 NOTE: I can't autofit columns through the script but here's how to do it manually:
 https://support.office.com/en-us/article/change-the-column-width-and-row-height-72f5e3cc-994d-43e8-ae58-9774a0905f46
 '''
-<<<<<<< HEAD
 with pd.ExcelWriter('results/'+json_filename+'.xlsx', engine='xlsxwriter') as writer:
     clean.to_excel(writer, sheet_name='All Packets')
     occurrences.to_excel(writer, sheet_name='Occurrences')
@@ -407,8 +358,3 @@ with pd.ExcelWriter('results/'+json_filename+'.xlsx', engine='xlsxwriter') as wr
         stat_tabler(writer, 'msgID-'+msg, data, msg)
 
 
-=======
-with pd.ExcelWriter('results/intel_results_test.xlsx') as writer:
-    clean.to_excel(writer, sheet_name='Parsed')
-    occurances.to_excel(writer, sheet_name='Occurances')
->>>>>>> 23598fd066b78c745309480d9d18aaf5ea7d3244
