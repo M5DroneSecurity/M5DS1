@@ -2,8 +2,9 @@
 from xml.dom import minidom
 
 '''
-Next, I want it to display random statistical information.
-How about it parses through each field and returns an occurance count of data within each field?
+Function that parses through each field and returns an occurance count of data within each field
+@input: 
+@output: 
 '''
 def fieldcounter(data_field):
     count_arr = {}
@@ -36,8 +37,8 @@ def message_decoder(msgid):
     m = str(m).lstrip()
 
     # Compare to XML
-    xml_source = './includes/common_messages.xml'
-    print("Grabbing XML: " + xml_source)
+    xml_source = './Includes/common_messages.xml'
+    # print("Grabbing XML: " + xml_source)
     common = minidom.parse(xml_source).getElementsByTagName('message')
     for c in common:
         if c.attributes['id'].value == m:

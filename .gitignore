@@ -1,4 +1,7 @@
 *.idea
-DataParser/decrypted
-DataParser/results
+DataParser/Decrypted/Intel/*.json
+DataParser/Decrypted/Viper/*.json
+DataParser/Decrypted/Viper/Viper01Dec2019
+DataParser/Decrypted/Solo/*.json
+DataParser/Results/*.xlsx
 __pycache__
