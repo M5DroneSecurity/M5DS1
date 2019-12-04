@@ -1,3 +1,4 @@
 *.idea
 DataParser/decrypted
 DataParser/results
+__pycache__
