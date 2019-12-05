@@ -4,15 +4,17 @@ This repository is for the EE x96: Drone Security project under Dr. Yingfei Dong
 Link to last year's UAVClassifier code: https://github.com/marionne/uav-classifier
 
 
-# DataParser Script
+# DataParser
 ### Purpose
+Running main.py will parse and plot all the JSON in the specified directory
+
 This script parses through given JSON file from decrypted/ and extracts the payload data for each packet.
   
 This payload data is then parsed using the MAVLINK 2.0 Serialization
 
 Graphs Occurrence by Msg_ID
 
-Finds top 5 most abundant packets (including heartbeat) and provides:
+Finds top 4 most abundant packets and heartbeat and provides:
 
  - message type via xml parsing
 
@@ -22,7 +24,7 @@ Finds top 5 most abundant packets (including heartbeat) and provides:
 
  - graph of MavLink message time delta
 
-Outputs to Excel (.xlsx) sheet in results/ directory
+Outputs to Excel (.xlsx) sheet in Results/ directory
 
 ### Setup
 From Team Drive,
@@ -42,7 +44,7 @@ Note: the variable json_location specifies the path to this JSON file
 
 
 ### How to run
-**I recommend you use Pycharm.** This was developed in JetBrains PyCharm 2019.1.2
+**I recommend you use Pycharm for convenience.** This was developed in JetBrains PyCharm 2019.1.2
 
 With Anaconda Prompt,
 ```
@@ -54,15 +56,21 @@ With Anaconda Prompt,
     > python3 -m pip install openpyxl --user
     > python3 -m pip install xlsxwriter --user
     > python3 -m pip install [LIBRARY] --user
-# clone repo --> enter main directory containing data_parser.py --> execute script
+# clone repo --> enter main directory containing main.py
     > git clone [LINK]
     > cd [DIRECTORY]
-    > python3 .\data_parser.py
+# Specify filepath for JSON files in main.py --> execute script
+    > python3 .\main.py
 ``` 
 
 With Mac OS,
 
        idk just do it
+       
+### Work in Progress
+- normal distribution plot for each message id
+- overlay distribution plots for each message id of given drone
+
 
 
 

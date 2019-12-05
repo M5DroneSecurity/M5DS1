@@ -143,14 +143,14 @@ Function that graphs the normal distribution of time_delta for a given msgid
 @output: 
 '''
 def density_grapher(writer_, sheet_, data_, msgid_):
-    ## Access the Xlswriter workbook and worksheets objects from the dataframe.
+    ''' Access the Xlswriter workbook and worksheets objects from the dataframe. '''
     workbook = writer_.book
     worksheet = writer_.sheets[sheet_]
 
-    ## Create a chart object
+    ''' Create a chart object '''
     density_chart = workbook.add_chart({'type': 'line'})
 
-    ## Configure the series of the chart from the dataframe data
+    ''' Configure the series of the chart from the dataframe data '''
     indexList = list(data_['FRAME_RELTIME'])
     r1 = 1
     r2 = len(indexList)
@@ -159,7 +159,7 @@ def density_grapher(writer_, sheet_, data_, msgid_):
         'values': [sheet_, r1, 15, r2, 15]
     })
 
-    ## Configure chart axis
+    ''' Configure chart axis '''
     density_chart.set_x_axis({'name': 'time_delta (sec)',
                       'major_gridlines': {
                           'visible': True,
@@ -175,10 +175,10 @@ def density_grapher(writer_, sheet_, data_, msgid_):
     density_chart.set_title({'name': 'Distribution for Msg ID-' + msgid_})
     # chart.set_chartarea({'border': {'none': True}})
 
-    ## Turn off default legend
+    ''' Turn off default legend '''
     density_chart.set_legend({'none': True})
 
-    ## Insert chart into worksheet
+    ''' Insert chart into worksheet '''
     worksheet.insert_chart('S44', density_chart)
 
 

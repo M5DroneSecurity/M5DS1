@@ -18,3 +18,4 @@ for json_file in os.listdir(json_dir):
     if json_file.endswith(".json"):
         data_parser(json_dir,os.path.splitext(json_file)[0])
 
+

@@ -27,16 +27,16 @@ Function that compares the msgid to the common_messages.xml to find the msg_type
 @output: msg_type
 '''
 def message_decoder(msgid):
-    # grab msgid as str
+    ''' grab msgid as str '''
     m = msgid.replace(" ", "")
 
-    # str -> hex -> int -> str
+    ''' str -> hex -> int -> str '''
     m = bytearray.fromhex(m)
     m.reverse()
     m = int.from_bytes(m, byteorder='big', signed=False)
     m = str(m).lstrip()
 
-    # Compare to XML
+    ''' Compare to XML '''
     xml_source = './Includes/common_messages.xml'
     # print("Grabbing XML: " + xml_source)
     common = minidom.parse(xml_source).getElementsByTagName('message')
