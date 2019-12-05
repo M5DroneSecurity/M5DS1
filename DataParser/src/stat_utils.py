@@ -1,3 +1,9 @@
+"""
+Title: stat_utils.py
+By: M5DS1
+Description:
+    Contains functions for the yellow stat table, etc.
+"""
 
 from xml.dom import minidom
 

@@ -68,7 +68,7 @@ def data_parser(json_directory, json_filename):
         # print(split_data[dat])
 
     # print("DEBUG: Length of split_data is {}".format(split_data))
-    print("DEBUG: Length of data_data is {}".format(len(data_data)))
+    print("MavLink Packets: {}".format(len(data_data)))
 
 
     '''
@@ -133,14 +133,13 @@ def data_parser(json_directory, json_filename):
     NOTE: I can't autofit columns through the script but here's how to do it manually:
     https://support.office.com/en-us/article/change-the-column-width-and-row-height-72f5e3cc-994d-43e8-ae58-9774a0905f46
     '''
-
     with pd.ExcelWriter('Results/'+json_filename+'.xlsx', engine='xlsxwriter') as writer:
-        ''' All Data '''
+        ''' Bulk Data '''
         clean.to_excel(writer, sheet_name='All Packets')
         msg_ids.to_excel(writer, sheet_name='Occurrences')
         occur_grapher(writer, 'Occurrences', msg_ids)
 
-        ''' Heartbeat Sheet '''
+        ''' Heartbeat '''
         hb = clean.loc[clean['msgid [7:10]'] == '00 00 00']
         hb['TIME_DELTA'] = hb['FRAME_RELTIME'] - hb['FRAME_RELTIME'].shift(1)
         hb.to_excel(writer, sheet_name='msgID-'+'00 00 00')
@@ -159,4 +158,4 @@ def data_parser(json_directory, json_filename):
             # density_grapher(writer,'msgID-'+msg, data, msg)
             stat_tabler(writer, 'msgID-'+msg, data, msg)
 
-    print("Finished!! OUTPUTTED TO:  " + 'Results/' + json_filename + '.xlsx')
+    print("Finished!! Outputted to:  " + 'Results/' + json_filename + '.xlsx')
